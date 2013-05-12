@@ -7,7 +7,7 @@ Usage:
 
 	lua leo.lua searchterm
 
-This will look up *searchterm* as an english or german word and will print
+This will look up *searchterm* as an English or German word and will print
 related translations.
 
 If you want to select a different language than English for translation to/from
