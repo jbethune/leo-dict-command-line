@@ -63,8 +63,8 @@ function print_section( section )
 	end
 end
 
-local url = "http://dict.leo.org/ende/?lang=%s&search=%s" 
-local languages = arg[ 2 ] or "en" --language conversion parameter
+local url = "http://dict.leo.org/%sde/?lang=en&search=%s" 
+local language = arg[ 2 ] or "en"
 local term = arg[ 1 ] --term to look up
 
 if not term then
@@ -72,7 +72,8 @@ if not term then
 	return -1
 end
 
-local page = get_document( string.format( url, languages, term ) )
+local page = get_document( string.format( url, language, term ) )
+
 for section in string.gmatch( page, 'id="section%-%d+".-</tbody>' ) do
 	print_section( section )
 end
