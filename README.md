@@ -15,7 +15,7 @@ German, you can provide a second command line argument:
 
 	lua leo.lua searchterm fr
 
-Now *searchterm* will be regarded as a french word or it will be attempted to
+Now *searchterm* will be regarded as a French word or it will be attempted to
 translate *searchterm* to French.
 
 The output format may still change in the future.

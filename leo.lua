@@ -46,7 +46,7 @@ function print_section( section )
 	local row_area = string.sub( section, tbody_start )
 
 	print( invert( '== ' .. section_name .. ' ==' ) )
-	for row in string.gmatch( row_area, '<tr>(.-)</tr>' ) do
+	for row in string.gmatch( row_area, '<tr[^>]*>(.-)</tr>' ) do
 		row = row.gsub( row, "\n", "" )
 		local i = 1
 		local first, second = "", ""
