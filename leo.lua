@@ -27,7 +27,7 @@ function underline( s )
 end
 
 function render_html( code )
-	for i, junk in ipairs{ "&bsp", "</?small>", "</?sup>" } do
+	for i, junk in ipairs{ '&bsp', '&#160;', '</?small>', '</?sup>' } do
 		code = string.gsub( code, junk, "" )
 	end
 	code = string.gsub( code, "<i>(.-)</i>?", invert )
@@ -35,35 +35,17 @@ function render_html( code )
 end
 
 function print_section( section )
-	local _, name_end, section_name = string.find(
+	local _, _, section_name = string.find(
 		section,
-		'<h2>(.-)</h2>' )
-	local tbody_start, _ = string.find(
-		section,
-		'<tbody>',
-		name_end,
-		true )
-	local row_area = string.sub( section, tbody_start )
+		'sctTitle="(.-)"' )
 
 	print( invert( '== ' .. section_name .. ' ==' ) )
-	for row in string.gmatch( row_area, '<tr[^>]*>(.-)</tr>' ) do
-		row = row.gsub( row, "\n", "" )
-		local i = 1
-		local first, second = "", ""
-		for cell in string.gmatch( row, '<td[^>]*>(.-)</td>' ) do
-			if i == 5 then
-				first = render_html( cell )
-			elseif i == 8 then
-				second = render_html( cell )
-				break
-			end
-			i = i + 1
-		end
-		print( first, "\t", second ) --I'm still thinking about nicer output strategies
+	for a, b in string.gmatch( section, '<entry[^>]*>.-<repr>(.-)</repr>.-<repr>(.-)</repr>.-</entry>' ) do
+		print( render_html( a ), '\t', render_html( b ) ) -- Output format may change in the future
 	end
 end
 
-local url = "http://dict.leo.org/%sde/?lang=en&search=%s" 
+local url = 'http://dict.leo.org/dictQuery/m-vocab/%sde/query.xml?tolerMode=nof&lp=%sde&lang=de&rmWords=off&rmSearch=on&directN=0&search=%s&searchLoc=0&resultOrder=basic&multiwordShowSingle=on&sectLenMax=16'
 local language = arg[ 2 ] or "en"
 local term = arg[ 1 ] --term to look up
 
@@ -72,8 +54,8 @@ if not term then
 	return -1
 end
 
-local page = get_document( string.format( url, language, term ) )
+local page = get_document( string.format( url, language,language, term ) )
 
-for section in string.gmatch( page, 'id="section%-%d+".-</tbody>' ) do
+for section in string.gmatch( page, '<section.->.-</section>' ) do
 	print_section( section )
 end
