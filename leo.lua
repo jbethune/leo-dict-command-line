@@ -45,7 +45,7 @@ function print_section( section )
 	end
 end
 
-local url = 'http://dict.leo.org/dictQuery/m-vocab/%sde/query.xml?tolerMode=nof&lp=%sde&lang=de&rmWords=off&rmSearch=on&directN=0&search=%s&searchLoc=0&resultOrder=basic&multiwordShowSingle=on&sectLenMax=16'
+local url = 'https://dict.leo.org/dictQuery/m-vocab/%sde/query.xml?tolerMode=nof&lp=%sde&lang=de&rmWords=off&rmSearch=on&directN=0&search=%s&searchLoc=0&resultOrder=basic&multiwordShowSingle=on&sectLenMax=16'
 local language = arg[ 2 ] or "en"
 local term = arg[ 1 ] --term to look up
 
