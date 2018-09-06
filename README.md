@@ -25,7 +25,10 @@ Dependencies
 ------------
 
 This Lua module depends on
+[LuaSec](https://github.com/brunoos/luasec/wiki)
+and indirectly depends on
 [LuaSocket](http://www.cs.princeton.edu/~diego/professional/luasocket/)
+to download the translation pages.
 
 Installation
 ------------

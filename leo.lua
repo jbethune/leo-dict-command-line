@@ -1,15 +1,15 @@
 module( "leo", package.seeall )
 
-local http = require "socket.http"
+local https = require "ssl.https"
 local flow = require "ltn12"
 
 function get_document( url )
 	local tab = {}
-	local response = http.request{
-		url = url,
-		sink = flow.sink.table( tab )
-	}
-	return table.concat( tab )
+	local response, code, headers, status = https.request( url )
+	if code ~= 200 then
+		print( "Error: ", status )
+	end
+	return response
 end
 
 function ansi_format( s, code )
@@ -26,36 +26,63 @@ function underline( s )
 	return ansi_format( s, 4 )
 end
 
-function render_html( code )
-	for i, junk in ipairs{ '&bsp', '&#160;', '</?small>', '</?sup>' } do
-		code = string.gsub( code, junk, "" )
-	end
-	code = string.gsub( code, "<i>(.-)</i>?", invert )
-	return string.gsub( code, "<b>(.-)</b>", underline )
-end
-
-function print_section( section )
-	local _, _, section_name = string.find(
-		section,
-		'sctTitle="(.-)"' )
-
-	print( invert( '== ' .. section_name .. ' ==' ) )
-	for a, b in string.gmatch( section, '<entry[^>]*>.-<repr>(.-)</repr>.-<repr>(.-)</repr>.-</entry>' ) do
-		print( render_html( a ), '\t', render_html( b ) ) -- Output format may change in the future
+function get_h2_text( table )
+	local match = table:match "<h2.->(.-)</h2>"
+	if match:find "Mögliche Grundformen" then --ignore basic forms
+		return nil
+	else
+		return match
 	end
 end
 
-local url = 'https://dict.leo.org/dictQuery/m-vocab/%sde/query.xml?tolerMode=nof&lp=%sde&lang=de&rmWords=off&rmSearch=on&directN=0&search=%s&searchLoc=0&resultOrder=basic&multiwordShowSingle=on&sectLenMax=16'
-local language = arg[ 2 ] or "en"
+function get_words( tab ) 
+	local result = {}
+	for expr in tab:gmatch "<samp>(.-)</samp>" do
+		local without_tags = expr:gsub( "<[^>]->", "" ):gsub( "|.*", "" )
+		table.insert( result, without_tags )
+	end
+	return result
+end
+
+local url = 'https://dict.leo.org/%s-deutsch/%s'
+local language = arg[ 2 ] or "englisch"
 local term = arg[ 1 ] --term to look up
+
+local short_language_names = {
+	de = "deutsch",
+	en = "englisch",
+	fr = "französisch",
+	es = "spanisch",
+	it = "italienisch",
+	ch = "chinesisch",
+	ru = "russisch",
+	pt = "portugiesisch",
+	pl = "polnisch"
+}
 
 if not term then
 	print "Please supply a term for translation"
 	return -1
 end
 
-local page = get_document( string.format( url, language,language, term ) )
+if short_language_names[ language ] then
+	language = short_language_names[ language ] -- replace with longer name
+end
 
-for section in string.gmatch( page, '<section.->.-</section>' ) do
-	print_section( section )
+local page = get_document( string.format( url, language, term ) )
+
+for table in string.gmatch( page, '<h2 class="ta%-c.-</tbody>' ) do
+	local header = get_h2_text( table )
+	if header then
+		print( invert( header ) )
+		local words = get_words( table )
+		local left_word = nil
+		for i, word in ipairs( words ) do
+			if i % 2 == 1 then
+				left_word = word
+			else
+				print( left_word, word )
+			end
+		end
+	end
 end
