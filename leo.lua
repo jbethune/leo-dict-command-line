@@ -1,7 +1,6 @@
 module( "leo", package.seeall )
 
 local https = require "ssl.https"
-local flow = require "ltn12"
 
 function get_document( url )
 	local tab = {}
